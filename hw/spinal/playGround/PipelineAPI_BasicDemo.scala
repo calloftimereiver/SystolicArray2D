@@ -28,7 +28,7 @@ class PipelineAPI_BasicDemo extends Component {
   n0(VALUE) := io.up.payload
 
   // Let's do some processing on n1
-  n1(RESULT) := n1(VALUE) + 0x1200
+  n1(RESULT) := n1(VALUE)/3 
 
   // Let's bind n2 to io.down
   n2.ready := io.down.ready
@@ -53,7 +53,7 @@ object PipelineAPI_BasicDemo_Sim extends App {
       true
     }
     StreamMonitor(dut.io.up, dut.clockDomain) { payload =>
-      scoreboard.pushRef(payload.toInt)
+      scoreboard.pushRef(payload.toInt/3)
     }
     // randmize ready on the output and add popped data to scoreboard
     StreamReadyRandomizer(dut.io.down, dut.clockDomain)
