@@ -1,18 +1,17 @@
-package AttentionCore.PE
+package AttentionCore.SystolicArray2D
 import spinal.core._
 import spinal.lib._
 import spinal.core
 /** **************************************************************
  *
- *    SystolicArrayUnit
+ *    SystolicArray2DUnit
  *
- *    SystolicArrayUnit is one Unit of systolic array
- *                                                                                                                                   
-                                        
+ *    SystolicArray2DUnit is one Unit of systolic array 2D
+ *                                                                                                                                                                
  *
  *
  * *************************************************************/
-case class SystolicArrayUnit_Config
+case class SystolicArray2DUnit_Config
 (
   in_Length   : Int,  // number of input data
   inA_Width   : Int,
@@ -43,7 +42,7 @@ inFinalA ───►│  inB_Width  ├──outFinalA─►
                 ▼      ▼           └────► 
   
  */
-case class SystolicArrayUnit(cfg: SystolicArrayUnit_Config) extends Component {
+case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Component {
 
   // 定义组件的输入和输出接口
   val io = new Bundle {
@@ -81,10 +80,10 @@ case class SystolicArrayUnit(cfg: SystolicArrayUnit_Config) extends Component {
   val Latency = 1
 }
 
-object SystolicArrayUnit_Verilog extends App{
-    val cfg = SystolicArrayUnit_Config(32,16,16)
+object SystolicArray2DUnit_Verilog extends App{
+    val cfg = SystolicArray2DUnit_Config(32,16,16)
 
-    val FileDir = "rtl/SystolicArrayUnit/verilog"
+    val FileDir = "rtl/SystolicArray2DUnit/verilog"
     import java.io.File
     new File(FileDir).mkdirs()
     
@@ -92,24 +91,24 @@ object SystolicArrayUnit_Verilog extends App{
     targetDirectory = FileDir,
     oneFilePerComponent = true,
     defaultConfigForClockDomains = ClockDomainConfig(resetActiveLevel = LOW)
-    ).generateVerilog(new SystolicArrayUnit(cfg)).printPruned()
+    ).generateVerilog(new SystolicArray2DUnit(cfg)).printPruned()
     
-    tools.HDElkDiagramGen(SpinalVerilog(new SystolicArrayUnit(cfg)))
+    tools.HDElkDiagramGen(SpinalVerilog(new SystolicArray2DUnit(cfg)))
 }
 
-object SystolicArrayUnit_Sim extends App {
-    val FileDir = "rtl/SystolicArrayUnit/verilog"
+object SystolicArray2DUnit_Sim extends App {
+    val FileDir = "rtl/SystolicArray2DUnit/verilog"
     import java.io.File
     new File(FileDir).mkdirs()
     import spinal.core.sim._
     val testLength=32
-    val cfg = SystolicArrayUnit_Config(testLength,8,8)
+    val cfg = SystolicArray2DUnit_Config(testLength,8,8)
 
         SimConfig.withConfig(SpinalConfig(
         targetDirectory = FileDir,
         oneFilePerComponent = true,
         defaultConfigForClockDomains = ClockDomainConfig(resetActiveLevel = LOW)
-        )).withFstWave.allOptimisation.compile(new SystolicArrayUnit(cfg)).doSim{ dut =>
+        )).withFstWave.allOptimisation.compile(new SystolicArray2DUnit(cfg)).doSim{ dut =>
         // Fork a process to generate the reset and the clock on the dut
         dut.clockDomain.forkStimulus(period = 10)
         var xout_ref=0
