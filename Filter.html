@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> RTL diagrams of Filter</title>
+    <style>
+.buttons-container {
+ display: flex;
+ justify-content: center;
+ margin-top:30px;
+}
+
+.buttons-container button {
+ background-color: #4CAF50;
+ color: white;
+ border: none;
+ padding:10px20px;
+ margin:010px;
+ cursor: pointer;
+ border-radius:5px;
+}
+
+.center-title {
+  text-align: center;
+  font-size:24px;
+  font-weight: bold;
+  margin-top:20px;
+ margin-bottom: 20px;
+}
+.goTop {
+	width: 50px;
+	height: 50px;
+	background-color: aquamarine;
+	font-size: 20px;
+	text-align: center;
+	line-height: 25px;
+	color: azure;
+	position: fixed;
+	bottom: 50px;
+	right: 50px;
+	display: none;
+}
+    </style>
+</head>
+<body>
+<button class="goTop" id="gotop">Go Top</button>
+<script>
+	var goTop=document.getElementById("gotop")
+	    window.onscroll=function(){
+		var jhlheight=document.documentElement.scrollTop||document.body.scrollTop
+		if(jhlheight>=300){
+		goTop.style.display="block"
+		}else{
+		goTop.style.display="none"
+   }
+	}
+	  goTop.onclick=function(){
+		window.scrollTo({
+			top:0,
+			behavior:"smooth"
+		})
+	}
+</script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/elk.bundled.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/svg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/hdelk.js"></script>
+
+<h1 class="center-title">choose diagrams</h1>
+<div class="buttons-container">
+<a href="#Filter"><button>Filter</button></a>&nbsp;
+<a href="#u_fifo_in"><button>u_fifo_in</button></a>&nbsp;
+</div><br><br><br><br>
+
+<div id="Filter"></div>
+<h3>Filter</h3><br><br><br><br>
+<script type="text/javascript">
+
+var mygraph = {
+children:[
+{id:"Filter",
+highlight:10,
+inPorts: ["din","flush",],
+outPorts: ["dout",],
+children: [
+{id:"din_toStream",
+},
+{id:"u_fifo_in",
+highlight:10,
+inPorts: ["io_push",],
+outPorts: ["io_pushOccupancy","io_pop","io_popOccupancy",],
+},
+],
+edges:[
+{ source:"Filter.din",target:"din_toStream",bus:1,label:"Flow to Stream",},
+{ source:"din_toStream",target:"u_fifo_in.io_push",bus:1,label:"Stream",},
+{ source:"u_fifo_in.io_pop",target:"Filter.dout",bus:1,label:"Stream to Flow",},
+]
+},
+{id:"ClockDomains",
+children:[
+{id:"mixedClk",highlight:10,inPorts:[ "In" ],outPorts:[ "Out" ]},
+]
+}
+],
+}
+hdelk.layout( mygraph,"Filter");
+</script>
+
+<div id="u_fifo_in"></div>
+<h3>u_fifo_in</h3><br><br><br><br>
+<script type="text/javascript">
+
+var mygraph = {
+children:[
+{id:"u_fifo_in",
+highlight:10,
+inPorts: ["io_push",],
+outPorts: ["io_pushOccupancy","io_pop","io_popOccupancy",],
+children: [
+{id:"popCC_readArbitation",
+highlight:3,
+},
+{id:"_zz_1",
+highlight:2,
+},
+{id:"popCC_addressGen",
+highlight:3,
+},
+{id:"_zz_io_pushOccupancy",
+highlight:2,
+},
+{id:"pushToPopGray_buffercc",
+highlight:3,
+inPorts: [{id:"io_dataIn",highlight:3},],
+outPorts: [{id:"io_dataOut",highlight:3},],
+},
+{id:"popCC_readArbitation_fire",
+highlight:3,
+},
+{id:"popToPushGray_buffercc",
+highlight:2,
+inPorts: [{id:"io_dataIn",highlight:2},],
+outPorts: [{id:"io_dataOut",highlight:2},],
+},
+{id:"_zz_io_popOccupancy_2",
+highlight:3,
+},
+{id:"smp_reset_syncronized",
+highlight:4,
+},
+{id:"popCC_readPort",
+highlight:3,
+},
+{id:"when_Stream_l369",
+highlight:3,
+},
+{id:"_zz_io_popOccupancy",
+highlight:3,
+},
+{id:"popCC",
+highlight:3,
+},
+{id:"popCC_addressGen_fire",
+highlight:3,
+},
+{id:"pushToPopGray",
+},
+{id:"popToPushGray",
+},
+{id:"pushCC",
+highlight:2,
+},
+{id:"_zz_io_popOccupancy_1",
+highlight:3,
+},
+{id:"io_push_fire",
+highlight:2,
+},
+{id:"_zz_io_pushOccupancy_1",
+highlight:2,
+},
+{id:"_zz_io_pushOccupancy_2",
+highlight:2,
+},
+{id:"bufferCC_3",
+highlight:4,
+inPorts: [{id:"io_dataIn",highlight:4},],
+outPorts: [{id:"io_dataOut",highlight:4},],
+},
+{id:"popCC_readArbitation_translated",
+highlight:3,
+},
+],
+edges:[
+{ source:"popCC",target:"_zz_io_popOccupancy_1",bus:0,label:"popCC_pushPtrGray",highlight:3},
+{ source:"popCC_addressGen_fire",target:"popCC_readPort",bus:0,highlight:3},
+{ source:"popCC_readPort",target:"popCC_readArbitation_translated",bus:1,label:"MemReadPort to Stream",highlight:3},
+{ source:"pushToPopGray",target:"pushToPopGray_buffercc.io_dataIn",bus:0,},
+{ source:"pushCC",target:"_zz_io_pushOccupancy_1",bus:0,label:"pushCC_popPtrGray",highlight:2},
+{ source:"popCC",target:"popCC_addressGen",bus:0,label:"popCC_popPtr",highlight:3},
+{ source:"_zz_io_popOccupancy",target:"u_fifo_in.io_popOccupancy",bus:0,highlight:3},
+{ source:"pushCC",target:"u_fifo_in.io_pushOccupancy",bus:0,label:"pushCC_pushPtr",highlight:2},
+{ source:"popCC_addressGen",target:"popCC_readPort",bus:1,label:"Stream to MemReadPort",highlight:3},
+{ source:"popCC",target:"popToPushGray",bus:0,label:"popCC_ptrToPush",highlight:3},
+{ source:"popCC_addressGen",target:"popCC_readArbitation",bus:0,label:"popCC_addressGen_rData",highlight:3},
+{ source:"popToPushGray_buffercc.io_dataOut",target:"pushCC",bus:0,label:"pushCC_popPtrGray",highlight:2},
+{ source:"popCC_addressGen",target:"popCC_readArbitation",bus:0,label:"popCC_addressGen_rValid",highlight:3},
+{ source:"_zz_io_popOccupancy_1",target:"u_fifo_in.io_popOccupancy",bus:0,highlight:3},
+{ source:"popCC_readArbitation",target:"when_Stream_l369",bus:0,highlight:3},
+{ source:"popCC_readArbitation",target:"popCC_readArbitation_fire",bus:0,highlight:3},
+{ source:"pushCC",target:"_zz_io_pushOccupancy_2",bus:0,label:"pushCC_popPtrGray",highlight:2},
+{ source:"_zz_io_popOccupancy_2",target:"u_fifo_in.io_popOccupancy",bus:0,highlight:3},
+{ source:"popCC",target:"u_fifo_in.io_popOccupancy",bus:0,label:"popCC_pushPtrGray",highlight:3},
+{ source:"popCC_readArbitation",target:"popCC_readArbitation_translated",bus:1,label:"Stream",highlight:3},
+{ source:"popToPushGray",target:"popToPushGray_buffercc.io_dataIn",bus:0,},
+{ source:"popCC",target:"_zz_io_popOccupancy_2",bus:0,label:"popCC_pushPtrGray",highlight:3},
+{ source:"io_push_fire",target:"_zz_1",bus:0,highlight:2},
+{ source:"popCC_readArbitation",target:"popCC_addressGen",bus:1,label:"Stream",highlight:3},
+{ source:"_zz_io_popOccupancy_1",target:"_zz_io_popOccupancy",bus:0,highlight:3},
+{ source:"popCC_addressGen",target:"popCC_addressGen_fire",bus:0,highlight:3},
+{ source:"when_Stream_l369",target:"popCC_addressGen",bus:0,highlight:3},
+{ source:"popCC_readArbitation_translated",target:"popCC_readArbitation",bus:1,label:"Stream",highlight:3},
+{ source:"popCC_readArbitation_fire",target:"popCC",bus:0,label:"popCC_ptrToPush",highlight:3},
+{ source:"_zz_io_pushOccupancy",target:"u_fifo_in.io_pushOccupancy",bus:0,highlight:2},
+{ source:"pushCC",target:"_zz_io_pushOccupancy",bus:0,label:"pushCC_popPtrGray",highlight:2},
+{ source:"io_push_fire",target:"pushCC",bus:0,label:"pushCC_pushPtr",highlight:2},
+{ source:"pushCC",target:"pushToPopGray",bus:0,label:"pushCC_pushPtrGray",highlight:2},
+{ source:"popCC",target:"u_fifo_in.io_popOccupancy",bus:0,label:"popCC_ptrToOccupancy",highlight:3},
+{ source:"_zz_io_pushOccupancy_2",target:"u_fifo_in.io_pushOccupancy",bus:0,highlight:2},
+{ source:"_zz_io_pushOccupancy_1",target:"_zz_io_pushOccupancy",bus:0,highlight:2},
+{ source:"popCC_addressGen_fire",target:"popCC",bus:0,label:"popCC_popPtr",highlight:3},
+{ source:"_zz_io_pushOccupancy_2",target:"_zz_io_pushOccupancy_1",bus:0,highlight:2},
+{ source:"io_push_fire",target:"pushCC",bus:0,label:"pushCC_pushPtrGray",highlight:2},
+{ source:"popCC",target:"_zz_io_popOccupancy",bus:0,label:"popCC_pushPtrGray",highlight:3},
+{ source:"pushCC",target:"u_fifo_in.io_pushOccupancy",bus:0,label:"pushCC_popPtrGray",highlight:2},
+{ source:"popCC",target:"popCC_addressGen",bus:0,label:"popCC_empty",highlight:3},
+{ source:"popCC_readArbitation_fire",target:"popCC",bus:0,label:"popCC_ptrToOccupancy",highlight:3},
+{ source:"_zz_io_pushOccupancy_1",target:"u_fifo_in.io_pushOccupancy",bus:0,highlight:2},
+{ source:"u_fifo_in.io_push",target:"io_push_fire",bus:0,},
+{ source:"pushToPopGray_buffercc.io_dataOut",target:"popCC",bus:0,label:"popCC_pushPtrGray",highlight:3},
+{ source:"popCC_readArbitation_translated",target:"u_fifo_in.io_pop",bus:1,label:"Stream",highlight:3},
+{ source:"_zz_io_popOccupancy_2",target:"_zz_io_popOccupancy_1",bus:0,highlight:3},
+]
+},
+{id:"ClockDomains",
+children:[
+{id:"clk",highlight:4,inPorts:[ "In" ],outPorts:[ "Out" ]},
+{id:"clk",highlight:3,inPorts:[ "In" ],outPorts:[ "Out" ]},
+{id:"smp_clk",highlight:2,inPorts:[ "In" ],outPorts:[ "Out" ]},
+{id:"mixedClk",highlight:10,inPorts:[ "In" ],outPorts:[ "Out" ]},
+]
+}
+],
+}
+hdelk.layout( mygraph,"u_fifo_in");
+</script>
+</body>
+</html>

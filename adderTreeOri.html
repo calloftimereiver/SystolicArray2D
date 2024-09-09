@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> RTL diagrams of adderTreeOri</title>
+    <style>
+.buttons-container {
+ display: flex;
+ justify-content: center;
+ margin-top:30px;
+}
+
+.buttons-container button {
+ background-color: #4CAF50;
+ color: white;
+ border: none;
+ padding:10px20px;
+ margin:010px;
+ cursor: pointer;
+ border-radius:5px;
+}
+
+.center-title {
+  text-align: center;
+  font-size:24px;
+  font-weight: bold;
+  margin-top:20px;
+ margin-bottom: 20px;
+}
+.goTop {
+	width: 50px;
+	height: 50px;
+	background-color: aquamarine;
+	font-size: 20px;
+	text-align: center;
+	line-height: 25px;
+	color: azure;
+	position: fixed;
+	bottom: 50px;
+	right: 50px;
+	display: none;
+}
+    </style>
+</head>
+<body>
+<button class="goTop" id="gotop">Go Top</button>
+<script>
+	var goTop=document.getElementById("gotop")
+	    window.onscroll=function(){
+		var jhlheight=document.documentElement.scrollTop||document.body.scrollTop
+		if(jhlheight>=300){
+		goTop.style.display="block"
+		}else{
+		goTop.style.display="none"
+   }
+	}
+	  goTop.onclick=function(){
+		window.scrollTo({
+			top:0,
+			behavior:"smooth"
+		})
+	}
+</script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/elk.bundled.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/svg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/hdelk.js"></script>
+
+<h1 class="center-title">choose diagrams</h1>
+<div class="buttons-container">
+<a href="#adderTreeOri"><button>adderTreeOri</button></a>&nbsp;
+</div><br><br><br><br>
+
+<div id="adderTreeOri"></div>
+<h3>adderTreeOri</h3><br><br><br><br>
+<script type="text/javascript">
+
+var mygraph = {
+children:[
+{id:"adderTreeOri",
+highlight:2,
+inPorts: [{id:"io_xin",highlight:2},],
+outPorts: [{id:"io_xout",highlight:2},],
+children: [
+{id:"io_xout",
+highlight:2,
+},
+{id:"xstg1",
+highlight:2,
+},
+{id:"xstg2",
+highlight:2,
+},
+],
+edges:[
+{ source:"xstg2",target:"io_xout",bus:0,highlight:2},
+{ source:"io_xout",target:"adderTreeOri.io_xout",bus:0,},
+{ source:"adderTreeOri.io_xin",target:"xstg1",bus:1,label:"Vec",highlight:2},
+{ source:"xstg1",target:"xstg2",bus:1,label:"Vec",highlight:2},
+]
+},
+{id:"ClockDomains",
+children:[
+{id:"clk",highlight:2,inPorts:[ "In" ],outPorts:[ "Out" ]},
+]
+}
+],
+}
+hdelk.layout( mygraph,"adderTreeOri");
+</script>
+</body>
+</html>

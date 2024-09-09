@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> RTL diagrams of PipelineAPI_BasicDemo</title>
+    <style>
+.buttons-container {
+ display: flex;
+ justify-content: center;
+ margin-top:30px;
+}
+
+.buttons-container button {
+ background-color: #4CAF50;
+ color: white;
+ border: none;
+ padding:10px20px;
+ margin:010px;
+ cursor: pointer;
+ border-radius:5px;
+}
+
+.center-title {
+  text-align: center;
+  font-size:24px;
+  font-weight: bold;
+  margin-top:20px;
+ margin-bottom: 20px;
+}
+.goTop {
+	width: 50px;
+	height: 50px;
+	background-color: aquamarine;
+	font-size: 20px;
+	text-align: center;
+	line-height: 25px;
+	color: azure;
+	position: fixed;
+	bottom: 50px;
+	right: 50px;
+	display: none;
+}
+    </style>
+</head>
+<body>
+<button class="goTop" id="gotop">Go Top</button>
+<script>
+	var goTop=document.getElementById("gotop")
+	    window.onscroll=function(){
+		var jhlheight=document.documentElement.scrollTop||document.body.scrollTop
+		if(jhlheight>=300){
+		goTop.style.display="block"
+		}else{
+		goTop.style.display="none"
+   }
+	}
+	  goTop.onclick=function(){
+		window.scrollTo({
+			top:0,
+			behavior:"smooth"
+		})
+	}
+</script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/elk.bundled.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/svg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/hdelk.js"></script>
+
+<h1 class="center-title">choose diagrams</h1>
+<div class="buttons-container">
+<a href="#PipelineAPI_BasicDemo"><button>PipelineAPI_BasicDemo</button></a>&nbsp;
+</div><br><br><br><br>
+
+<div id="PipelineAPI_BasicDemo"></div>
+<h3>PipelineAPI_BasicDemo</h3><br><br><br><br>
+<script type="text/javascript">
+
+var mygraph = {
+children:[
+{id:"PipelineAPI_BasicDemo",
+highlight:2,
+inPorts: [{id:"io_up",highlight:2},],
+outPorts: [{id:"io_down",highlight:2},],
+children: [
+{id:"n0_ready",
+highlight:2,
+},
+{id:"when_StageLink_l67_1",
+highlight:2,
+},
+{id:"n1_VALUE",
+highlight:2,
+},
+{id:"n2_valid",
+highlight:2,
+},
+{id:"n1_RESULT",
+highlight:2,
+},
+{id:"when_StageLink_l67",
+highlight:2,
+},
+{id:"n0_VALUE",
+highlight:2,
+},
+{id:"n1_isValid",
+highlight:2,
+},
+{id:"n1_valid",
+highlight:2,
+},
+{id:"n1_ready",
+highlight:2,
+},
+{id:"n2_isValid",
+highlight:2,
+},
+{id:"n2_RESULT",
+highlight:2,
+},
+{id:"n0_valid",
+highlight:2,
+},
+{id:"n0_isReady",
+highlight:2,
+},
+{id:"n2_ready",
+highlight:2,
+},
+{id:"n0_isValid",
+highlight:2,
+},
+{id:"n1_isReady",
+highlight:2,
+},
+],
+edges:[
+{ source:"PipelineAPI_BasicDemo.io_up",target:"n0_valid",bus:0,highlight:2},
+{ source:"PipelineAPI_BasicDemo.io_up",target:"n0_VALUE",bus:0,highlight:2},
+{ source:"n1_RESULT",target:"n2_RESULT",bus:0,highlight:2},
+{ source:"n1_isValid",target:"n2_valid",bus:0,highlight:2},
+{ source:"n1_ready",target:"n0_ready",bus:0,highlight:2},
+{ source:"n1_ready",target:"n1_isReady",bus:0,highlight:2},
+{ source:"n0_isReady",target:"n1_valid",bus:0,highlight:2},
+{ source:"n1_valid",target:"n1_isValid",bus:0,highlight:2},
+{ source:"n1_isReady",target:"n2_RESULT",bus:0,highlight:2},
+{ source:"n2_RESULT",target:"PipelineAPI_BasicDemo.io_down",bus:0,highlight:2},
+{ source:"n2_valid",target:"PipelineAPI_BasicDemo.io_down",bus:0,highlight:2},
+{ source:"n1_VALUE",target:"n1_RESULT",bus:0,highlight:2},
+{ source:"n0_VALUE",target:"n1_VALUE",bus:0,highlight:2},
+{ source:"n0_ready",target:"n0_isReady",bus:0,highlight:2},
+{ source:"n1_isReady",target:"n2_valid",bus:0,highlight:2},
+{ source:"n2_ready",target:"n1_ready",bus:0,highlight:2},
+{ source:"when_StageLink_l67",target:"n0_ready",bus:0,highlight:2},
+{ source:"n0_isValid",target:"n1_valid",bus:0,highlight:2},
+{ source:"n0_valid",target:"n0_isValid",bus:0,highlight:2},
+{ source:"n1_isValid",target:"when_StageLink_l67",bus:0,highlight:2},
+{ source:"n0_isReady",target:"n1_VALUE",bus:0,highlight:2},
+{ source:"n2_valid",target:"n2_isValid",bus:0,highlight:2},
+{ source:"when_StageLink_l67_1",target:"n1_ready",bus:0,highlight:2},
+{ source:"n2_isValid",target:"when_StageLink_l67_1",bus:0,highlight:2},
+]
+},
+{id:"ClockDomains",
+children:[
+{id:"clk",highlight:2,inPorts:[ "In" ],outPorts:[ "Out" ]},
+]
+}
+],
+}
+hdelk.layout( mygraph,"PipelineAPI_BasicDemo");
+</script>
+</body>
+</html>

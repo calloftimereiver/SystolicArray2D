@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> RTL diagrams of MyTopLevel</title>
+    <style>
+.buttons-container {
+ display: flex;
+ justify-content: center;
+ margin-top:30px;
+}
+
+.buttons-container button {
+ background-color: #4CAF50;
+ color: white;
+ border: none;
+ padding:10px20px;
+ margin:010px;
+ cursor: pointer;
+ border-radius:5px;
+}
+
+.center-title {
+  text-align: center;
+  font-size:24px;
+  font-weight: bold;
+  margin-top:20px;
+ margin-bottom: 20px;
+}
+.goTop {
+	width: 50px;
+	height: 50px;
+	background-color: aquamarine;
+	font-size: 20px;
+	text-align: center;
+	line-height: 25px;
+	color: azure;
+	position: fixed;
+	bottom: 50px;
+	right: 50px;
+	display: none;
+}
+    </style>
+</head>
+<body>
+<button class="goTop" id="gotop">Go Top</button>
+<script>
+	var goTop=document.getElementById("gotop")
+	    window.onscroll=function(){
+		var jhlheight=document.documentElement.scrollTop||document.body.scrollTop
+		if(jhlheight>=300){
+		goTop.style.display="block"
+		}else{
+		goTop.style.display="none"
+   }
+	}
+	  goTop.onclick=function(){
+		window.scrollTo({
+			top:0,
+			behavior:"smooth"
+		})
+	}
+</script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/elk.bundled.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/svg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Readon/hdelk@master/js/hdelk.js"></script>
+
+<h1 class="center-title">choose diagrams</h1>
+<div class="buttons-container">
+<a href="#MyTopLevel"><button>MyTopLevel</button></a>&nbsp;
+<a href="#fixTo_1"><button>fixTo_1</button></a>&nbsp;
+</div><br><br><br><br>
+
+<div id="MyTopLevel"></div>
+<h3>MyTopLevel</h3><br><br><br><br>
+<script type="text/javascript">
+
+var mygraph = {
+children:[
+{id:"MyTopLevel",
+highlight:2,
+inPorts: [{id:"io_cond1",highlight:2},{id:"io_cond0",highlight:2},],
+outPorts: [{id:"io_state",highlight:2},{id:"io_flag",highlight:2},],
+children: [
+{id:"demo_uint_sum",
+highlight:2,
+},
+{id:"demo_uint_sum_fix",
+highlight:2,
+},
+{id:"Pre_demo_uint_sum_all1_if_overflow",
+highlight:2,
+},
+{id:"demo_uint_sum_all1_if_overflow",
+highlight:2,
+},
+{id:"target_bits",
+highlight:2,
+},
+{id:"when_UInt_l120",
+highlight:2,
+},
+{id:"demo_int_sum",
+highlight:2,
+},
+{id:"counter_next",
+highlight:2,
+},
+{id:"demo_int1",
+highlight:2,
+},
+{id:"counter",
+highlight:2,
+},
+{id:"demo_uint1",
+highlight:2,
+},
+{id:"counter_wire",
+highlight:2,
+},
+{id:"demo_int2",
+highlight:2,
+},
+{id:"fixTo_1",
+inPorts: [{id:"din",highlight:2},],
+outPorts: [{id:"dout",highlight:2},],
+},
+{id:"io_cond1",
+highlight:2,
+},
+{id:"product_uint12",
+highlight:2,
+},
+{id:"demo_uint2",
+highlight:2,
+},
+],
+edges:[
+{ source:"demo_uint1",target:"demo_uint_sum",bus:0,highlight:2},
+{ source:"demo_uint2",target:"product_uint12",bus:0,highlight:2},
+{ source:"demo_uint2",target:"demo_uint_sum",bus:0,highlight:2},
+{ source:"io_cond1",target:"MyTopLevel.io_flag",bus:0,highlight:2},
+{ source:"counter",target:"counter_next",bus:0,highlight:2},
+{ source:"counter",target:"MyTopLevel.io_flag",bus:0,highlight:2},
+{ source:"MyTopLevel.io_cond0",target:"counter",bus:0,highlight:2},
+{ source:"Pre_demo_uint_sum_all1_if_overflow",target:"demo_uint_sum_all1_if_overflow",bus:0,highlight:2},
+{ source:"demo_int1",target:"demo_int_sum",bus:0,highlight:2},
+{ source:"demo_uint1",target:"product_uint12",bus:0,highlight:2},
+{ source:"MyTopLevel.io_cond1",target:"io_cond1",bus:0,highlight:2},
+{ source:"counter",target:"MyTopLevel.io_state",bus:0,highlight:2},
+{ source:"demo_uint1",target:"demo_uint_sum_fix",bus:0,highlight:2},
+{ source:"demo_int2",target:"demo_int_sum",bus:0,highlight:2},
+{ source:"Pre_demo_uint_sum_all1_if_overflow",target:"when_UInt_l120",bus:0,highlight:2},
+{ source:"demo_uint2",target:"Pre_demo_uint_sum_all1_if_overflow",bus:0,highlight:2},
+{ source:"demo_uint2",target:"demo_uint_sum_fix",bus:0,highlight:2},
+{ source:"when_UInt_l120",target:"demo_uint_sum_all1_if_overflow",bus:0,highlight:2},
+{ source:"product_uint12",target:"fixTo_1.din",bus:0,highlight:2},
+{ source:"demo_uint1",target:"Pre_demo_uint_sum_all1_if_overflow",bus:0,highlight:2},
+]
+},
+{id:"ClockDomains",
+children:[
+{id:"clk",highlight:2,inPorts:[ "In" ],outPorts:[ "Out" ]},
+]
+}
+],
+}
+hdelk.layout( mygraph,"MyTopLevel");
+</script>
+
+<div id="fixTo_1"></div>
+<h3>fixTo_1</h3><br><br><br><br>
+<script type="text/javascript">
+
+var mygraph = {
+children:[
+{id:"fixTo_1",
+inPorts: [{id:"din",highlight:2},],
+outPorts: [{id:"dout",highlight:2},],
+children: [
+{id:"Pre_when_UInt_l120",
+highlight:2,
+},
+{id:"Pre_dout",
+highlight:2,
+},
+{id:"when_UInt_l120",
+highlight:2,
+},
+],
+edges:[
+{ source:"Pre_when_UInt_l120",target:"Pre_dout",bus:0,highlight:2},
+{ source:"fixTo_1.din",target:"Pre_when_UInt_l120",bus:0,highlight:2},
+{ source:"Pre_dout",target:"fixTo_1.dout",bus:0,highlight:2},
+{ source:"Pre_when_UInt_l120",target:"when_UInt_l120",bus:0,highlight:2},
+{ source:"when_UInt_l120",target:"Pre_dout",bus:0,highlight:2},
+]
+},
+{id:"ClockDomains",
+children:[
+{id:"clk",highlight:2,inPorts:[ "In" ],outPorts:[ "Out" ]},
+]
+}
+],
+}
+hdelk.layout( mygraph,"fixTo_1");
+</script>
+</body>
+</html>
