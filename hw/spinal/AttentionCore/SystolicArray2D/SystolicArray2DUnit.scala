@@ -14,8 +14,8 @@ import spinal.core
 case class SystolicArray2DUnit_Config
 (
   in_Length   : Int,  // number of input data
-  inA_Width   : Int,
-  inB_Width   : Int,
+  inA_Width   : Int=16,
+  inB_Width   : Int=16,
 )
 {
     val ABProduct_Width = inA_Width+inB_Width
@@ -77,7 +77,7 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
     ProductSum:=0
   }
 
-  val Latency = 1
+  //val Latency = 1
 }
 
 object SystolicArray2DUnit_Verilog extends App{
