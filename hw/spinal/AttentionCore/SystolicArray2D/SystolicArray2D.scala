@@ -46,6 +46,7 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
     //此处flow的valid是用来标记该位的payload是否有效。
     val in_MatA_Bus=slave(Stream(Vec(Flow(SInt(cfg.in_MatA_element_Width bits)),cfg.in_MatA_Bus_Width)))
     val in_MatB_Bus=slave(Stream(Vec(Flow(SInt(cfg.in_MatB_element_Width bits)),cfg.in_MatB_Bus_Width)))
+
     
 /* 
     val in_MatA = in SInt(cfg.in_MatA_Width bits)
@@ -63,11 +64,6 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
  */
   }
 
-  //传递数据
-  io.outA:=io.in_MatA
-  io.outB:=io.in_MatB
-  io.outFinalA:=io.inFinalA
-  io.outFinalB:=io.inFinalB
 
 
   val Latency = 1
