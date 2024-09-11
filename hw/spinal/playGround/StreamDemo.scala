@@ -4,7 +4,7 @@ import spinal.lib._
 import spinal.lib.sim.{StreamMonitor, StreamDriver, StreamReadyRandomizer, ScoreboardInOrder}
 
 object Example extends App {
-  val dut = SimConfig.withWave.compile(StreamFifo(Bits(8 bits), 2))
+  val dut = SimConfig.withFstWave.compile(StreamFifo(Bits(8 bits), 2))
 
   dut.doSim("simple test") { dut =>
     SimTimeout(10000)

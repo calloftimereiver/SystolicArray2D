@@ -23,7 +23,7 @@ case class SystolicArray2DUnit_Config
 }
 /* 
                                           
-               inB inFinalB               
+               inB inB_Final               
                 │      │                  
                 │      │                  
                 ▼      ▼                  
@@ -32,7 +32,7 @@ case class SystolicArray2DUnit_Config
              │             │              
      inA ───►│  in_Length  ├──outA──────► 
              │  inA_Width  │              
-inFinalA ───►│  inB_Width  ├──outFinalA─► 
+inA_Final───►│  inB_Width  ├──outFinalA─► 
              │             │              
              │             ├───────┐      
              └─────────────┘       │      
@@ -48,9 +48,9 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
   val io = new Bundle {
     
     val inA = in SInt(cfg.inA_Width bits)
-    val inFinalA = in Bool()
+    val inA_Final = in Bool()
     val inB = in SInt(cfg.inB_Width bits)
-    val inFinalB = in Bool()
+    val inB_Final = in Bool()
 
     val outA= out(Reg(SInt(cfg.inA_Width bits))) init 0
     val outFinalA = out(Reg(Bool())) init False
@@ -65,19 +65,19 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
   //传递数据
   io.outA:=io.inA
   io.outB:=io.inB
-  io.outFinalA:=io.inFinalA
-  io.outFinalB:=io.inFinalB
+  io.outFinalA:=io.inA_Final
+  io.outFinalB:=io.inB_Final
 
   val ABProduct=SInt(cfg.ABProduct_Width bits)
   ABProduct :=io.inA*io.inB
   val ProductSum=Reg(SInt(cfg.outZ_Width bits)) init 0
   ProductSum:=ABProduct+ProductSum
-  when((io.inFinalA===True)&&(io.inFinalB===True)){
+  when((io.inA_Final===True)&&(io.inB_Final===True)){
     io.outZ:=ABProduct+ProductSum
     ProductSum:=0
   }
 
-  //val Latency = 1
+  val Latency = cfg.in_Length
 }
 
 object SystolicArray2DUnit_Verilog extends App{
@@ -104,7 +104,7 @@ object SystolicArray2DUnit_Sim extends App {
     val testLength=32
     val cfg = SystolicArray2DUnit_Config(testLength,8,8)
 
-        SimConfig.withConfig(SpinalConfig(
+    SimConfig.withConfig(SpinalConfig(
         targetDirectory = FileDir,
         oneFilePerComponent = true,
         defaultConfigForClockDomains = ClockDomainConfig(resetActiveLevel = LOW)
@@ -116,17 +116,17 @@ object SystolicArray2DUnit_Sim extends App {
         var sumproduct:Int=0
         var inA:Int=0
         var inB:Int=0
-        dut.io.inFinalA#=false
-        dut.io.inFinalB#=false
+        dut.io.inA_Final#=false
+        dut.io.inB_Final#=false
         for (idx <- 0 to (testLength*10)) 
         {
             if(idx % testLength == (testLength-1)){
-                dut.io.inFinalA#=true
-                dut.io.inFinalB#=true
+                dut.io.inA_Final#=true
+                dut.io.inB_Final#=true
             }
             else{
-                dut.io.inFinalA#=false
-                dut.io.inFinalB#=false
+                dut.io.inA_Final#=false
+                dut.io.inB_Final#=false
             }
 
             dut.clockDomain.waitRisingEdge()
