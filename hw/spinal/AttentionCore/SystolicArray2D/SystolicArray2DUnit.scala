@@ -20,6 +20,8 @@ case class SystolicArray2DUnit_Config
 {
     val ABProduct_Width = inA_Width+inB_Width
     val outZ_Width = ABProduct_Width + log2Up(in_Length)
+    val Latency = in_Length
+    val IterationInterval = 1
 }
 /* 
                                           
@@ -77,7 +79,7 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
     ProductSum:=0
   }
 
-  val Latency = cfg.in_Length
+  
 }
 
 object SystolicArray2DUnit_Verilog extends App{
