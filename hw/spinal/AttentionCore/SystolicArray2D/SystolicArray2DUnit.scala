@@ -20,6 +20,7 @@ case class SystolicArray2DUnit_Config
 {
     val ABProduct_Width = inA_Width+inB_Width
     val outZ_Width = ABProduct_Width + log2Up(in_Length)
+    //待标定，现在只是占位符
     val Latency = in_Length
     val IterationInterval = 1
 }
@@ -53,32 +54,35 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
     val inA_Final = in Bool()
     val inB = in SInt(cfg.inB_Width bits)
     val inB_Final = in Bool()
+    val Go = in Bool()
 
     val outA= out(Reg(SInt(cfg.inA_Width bits))) init 0
     val outFinalA = out(Reg(Bool())) init False
     val outB= out(Reg(SInt(cfg.inB_Width bits))) init 0
     val outFinalB = out(Reg(Bool())) init False
 
-
     val outZ = out(Reg(SInt(cfg.outZ_Width bits))) init 0
     
   }
 
-  //传递数据
-  io.outA:=io.inA
-  io.outB:=io.inB
-  io.outFinalA:=io.inA_Final
-  io.outFinalB:=io.inB_Final
+
 
   val ABProduct=SInt(cfg.ABProduct_Width bits)
-  ABProduct :=io.inA*io.inB
   val ProductSum=Reg(SInt(cfg.outZ_Width bits)) init 0
-  ProductSum:=ABProduct+ProductSum
-  when((io.inA_Final===True)&&(io.inB_Final===True)){
-    io.outZ:=ABProduct+ProductSum
-    ProductSum:=0
+  ABProduct :=io.inA*io.inB
+  when(io.Go===True){
+    //传递数据
+    io.outA:=io.inA
+    io.outB:=io.inB
+    io.outFinalA:=io.inA_Final
+    io.outFinalB:=io.inB_Final
+    //计算部分
+    ProductSum:=ABProduct+ProductSum
+    when((io.inA_Final===True)&&(io.inB_Final===True)){
+      io.outZ:=ABProduct+ProductSum
+      ProductSum:=0
+    }
   }
-
   
 }
 
@@ -103,7 +107,7 @@ object SystolicArray2DUnit_Sim extends App {
     import java.io.File
     new File(FileDir).mkdirs()
     import spinal.core.sim._
-    val testLength=32
+    val testLength=3
     val cfg = SystolicArray2DUnit_Config(testLength,8,8)
 
     SimConfig.withConfig(SpinalConfig(
@@ -120,7 +124,9 @@ object SystolicArray2DUnit_Sim extends App {
         var inB:Int=0
         dut.io.inA_Final#=false
         dut.io.inB_Final#=false
-        for (idx <- 0 to (testLength*10)) 
+        var idx=0
+        dut.io.Go#=true
+        while(idx<(testLength*10)) 
         {
             if(idx % testLength == (testLength-1)){
                 dut.io.inA_Final#=true
@@ -133,10 +139,13 @@ object SystolicArray2DUnit_Sim extends App {
 
             dut.clockDomain.waitRisingEdge()
             // Drive the dut inputs with random values
+            dut.io.Go.randomize()
             dut.io.inA.randomize()
             dut.io.inB.randomize()
             inA=dut.io.inA.toInt
             inB=dut.io.inB.toInt
+            if(dut.io.Go.toBoolean)
+        {
             product=(inA * inB)
             sumproduct=sumproduct+product
             
@@ -146,6 +155,7 @@ object SystolicArray2DUnit_Sim extends App {
                 xout_ref=sumproduct
                 sumproduct=0
             }
+          }
 
             println(s"${idx}:inA:${dut.io.inA.toInt};inB:${dut.io.inB.toInt};sumproduct=${sumproduct};xout_ref=${xout_ref}")
             // Wait a rising edge on the clock
@@ -159,7 +169,10 @@ object SystolicArray2DUnit_Sim extends App {
 
             //println(dut.io.xout.toInt)
             
-        
+        if(dut.io.Go.toBoolean)
+        {
+          idx=idx+1
+        }
         }
     }
 

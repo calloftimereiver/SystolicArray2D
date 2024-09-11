@@ -35,11 +35,13 @@ case class MatMultUnit_Config
 
   val SystolicArray2D_Cfg = new SystolicArray2D_Config(in_Length_Max,in_MatA_element_Width,in_MatB_element_Width)
   //Z=A*B
-  //根据矩阵乘法，输出的行数就是A的行数，输出的列数就是B的列数
-  val out_MatZ_row_num=in_MatA_row_num//输出的Z矩阵的行数
-  val out_MatZ_col_num=in_MatB_col_num//输出的Z矩阵的列数
-  val out_MatZ_element_Width=SystolicArray2D_Cfg.out_MatZ_Width
+  val out_MatZ_row_num=SystolicArray2D_Cfg.in_MatA_row_num//输出的Z矩阵的行数
+  val out_MatZ_col_num=SystolicArray2D_Cfg.in_MatB_col_num//输出的Z矩阵的列数
+  val out_MatZ_element_Width=SystolicArray2D_Cfg.out_MatZ_element_Width
+//一次矩阵完整输出的元素数是cfg.out_MatZ_row_num*cfg.out_MatZ_col_num,而脉动阵列多久可以输出一个结果取决于最大的乘加次数，因此我将输出线的宽度定义为out_MatZ_row_num*out_MatZ_col_num/in_Length_Max
+ val out_MatZ_Bus_Width=out_MatZ_row_num*out_MatZ_col_num/in_Length_Max
   val out_Fifo_depth=Mat_num_inFifo*in_Length_Max//输出的fifo的深度
+
 }
 
 
@@ -61,9 +63,9 @@ case class MatMultUnit(cfg: MatMultUnit_Config) extends Component {
       new SintBundle_withFinalMark(Bus_Width=cfg.in_MatB_Bus_Width,element_Width=cfg.in_MatB_element_Width)
       ))
     val in_Mat_Fifo_flush=in Bool()
-    //一次矩阵完整输出的元素数是cfg.out_MatZ_row_num*cfg.out_MatZ_col_num,而脉动阵列多久可以输出一个结果取决于最大的乘加次数，因此我将输出线的宽度定义为out_MatZ_row_num*out_MatZ_col_num/in_Length_Max
+    
     val out_MatZ_Bus=master(Stream(
-      new SintBundle_withFinalMark(Bus_Width=cfg.out_MatZ_row_num*cfg.out_MatZ_col_num/cfg.in_Length_Max,element_Width=cfg.out_MatZ_element_Width)
+      new SintBundle_withFinalMark(Bus_Width=cfg.out_MatZ_Bus_Width,element_Width=cfg.out_MatZ_element_Width)
       ))
     val out_Mat_Fifo_flush=in Bool()
   }
@@ -76,7 +78,7 @@ case class MatMultUnit(cfg: MatMultUnit_Config) extends Component {
     depth=cfg.in_Fifo_depth
     )
   val out_MatZ_Fifo=StreamFifo(
-    dataType=SintBundle_withFinalMark(Bus_Width=cfg.out_MatZ_row_num*cfg.out_MatZ_col_num/cfg.in_Length_Max,element_Width=cfg.out_MatZ_element_Width),
+    dataType=SintBundle_withFinalMark(Bus_Width=cfg.out_MatZ_Bus_Width,element_Width=cfg.out_MatZ_element_Width),
     depth=cfg.out_Fifo_depth
     )
   in_MatA_Fifo.io.push << io.in_MatA_Bus
