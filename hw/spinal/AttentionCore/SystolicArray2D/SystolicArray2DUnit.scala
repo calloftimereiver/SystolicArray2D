@@ -36,12 +36,12 @@ case class SystolicArray2DUnit_Config
              │             │              
      inA ───►│  in_Length  ├──outA──────► 
              │  inA_Width  │              
-inA_Final───►│  inB_Width  ├──outFinalA─► 
+inA_Final───►│  inB_Width  ├──outA_Final─► 
              │             │              
              │             ├───────┐      
              └─────────────┘       │      
                 │      │         outZ     
-              outB outFinalB       │      
+              outB outB_Final       │      
                 │      │           │      
                 ▼      ▼           └────► 
   
@@ -58,9 +58,9 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
     val Go = in Bool()
 
     val outA= out(Reg(SInt(cfg.inA_Width bits))) init 0
-    val outFinalA = out(Reg(Bool())) init False
+    val outA_Final = out(Reg(Bool())) init False
     val outB= out(Reg(SInt(cfg.inB_Width bits))) init 0
-    val outFinalB = out(Reg(Bool())) init False
+    val outB_Final = out(Reg(Bool())) init False
 
     val outZ = out(Reg(SInt(cfg.outZ_Width bits))) init 0
     
@@ -75,8 +75,8 @@ case class SystolicArray2DUnit(cfg: SystolicArray2DUnit_Config) extends Componen
     //传递数据
     io.outA:=io.inA
     io.outB:=io.inB
-    io.outFinalA:=io.inA_Final
-    io.outFinalB:=io.inB_Final
+    io.outA_Final:=io.inA_Final
+    io.outB_Final:=io.inB_Final
     //计算部分
     ProductSum:=ABProduct+ProductSum
     when((io.inA_Final===True)&&(io.inB_Final===True)){
