@@ -175,13 +175,19 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
     //按照索引规定乘加器的输出行为(简单来说就是输出到哪个buffer)
     for(i <- 0 until cfg.out_MatZ_buffer_num)
     {
-        when(out_MatZ_Bundle_wire(0)(0).Final)
+        //该改索引号的优先改索引号
+        when(out_MatZ_Bundle_wire(0)(0).Final)//当索引为00的单元输出结果时，说明这是一个新的矩阵结果，0号索引号+1，并且如果超出了缓存数量，则从0重新开始
         {
+
+        
+
             
-        }otherwise
+        }otherwise//如果索引为00的单元输出结果不是，说明是同一个矩阵的结果，0号索引号不变。
         {
 
         }
+    //所有情况下，矩阵的输出数据都会被写入对应的缓存中
+    
 
     }
 
