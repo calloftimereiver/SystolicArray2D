@@ -21,7 +21,7 @@ case class SystolicArray2D_Config(
   in_MatA_element_Width   : Int=16,//输入的A矩阵的每个数的位宽
   in_MatB_element_Width   : Int=16,//输入的B矩阵的每个数的位宽
 
-  out_MatZ_buffer_num: Int=12
+  out_MatZ_buffer_num: Int=3
 )
 {
     val SystolicArray2DUnit_Cfg=SystolicArray2DUnit_Config(
@@ -62,14 +62,14 @@ case class SystolicArray2D_Config(
 //     │  │                            │    │    │    │                               
 //     │  └────────────────────────────┘    │    │    │                               
 //     │  │                                 │    │    │                               
-//     │  │                                 │    │    │                               
+//     │  │                              i  │    │    │                               
 //     │  └─────────┬───────────────────────┘    │    │                               
 //     │  │         │                            │    │                               
 //     │  │         │                            │    │                               
 //     │  └─────────┼──────────────────┬────────────┬─┘                               
 //     │            │                  │            │                                 
 //     │            │                  │            │                                 
-//     │            │                  │            │ SystolicArray2DUnit_buffer_ptr()
+//     │            │                  │            │ Unit2buffer_ptr()
 //     │            │                  │            │                                 
 //     │            │                  │            │                                 
 //     │            │                  │            │                                 
@@ -107,8 +107,11 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
         val in_MatB=slave(Stream(Vec.fill(cfg.in_MatB_col_num)(Sint_withFinalMark(cfg.in_MatB_element_Width))))
         val out_MatZ=master(Stream(Vec.fill(cfg.in_MatA_row_num)(Vec.fill(cfg.in_MatB_col_num)(SInt(cfg.out_MatZ_element_Width bits)))))
     }
-    assert(cfg.out_MatZ_buffer_num<=cfg.theoretical_out_MatZ_buffer_num)
-    
+    assert(
+        assertion=(cfg.out_MatZ_buffer_num<=cfg.theoretical_out_MatZ_buffer_num),
+        message="SystolicArray2D_Config.out_MatZ_buffer_num is too big,which is meaningless")
+    assert(assertion=(cfg.out_MatZ_buffer_num>1),
+    message="SystolicArray2D_Config.out_MatZ_buffer_num shall be at least 2")
     val interconnect_outA_with_inA=Vec.fill(cfg.in_MatA_row_num)(Vec.fill(cfg.in_MatB_col_num)(new Bundle{
         val data=SInt(cfg.SystolicArray2DUnit_Cfg.inA_Width bits)
         val Final=Bool()
@@ -161,8 +164,7 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
             out_MatZ_Bundle_wire(row_index)(col_index).Final:=unit.io.outA_Final&&unit.io.outB_Final
         }
     }
-    //先定义一个buffer结构
-    case class out_MatZ_buffer(cfg:SystolicArray2D_Config) extends Bundle {
+        case class out_MatZ_buffer(cfg:SystolicArray2D_Config) extends Bundle {
         val data=Vec.fill(cfg.in_MatA_row_num)(Vec.fill(cfg.in_MatB_col_num)(Reg(SInt(cfg.out_MatZ_element_Width bits)) init 0))
         val Occupied = Reg(Bool()) init False//说明已经有一部分数据在其中，正在等待剩余的数据传输完成。
         val Valid = Reg(Bool()) init False//说明所有的数据都已经就绪，可以输出了
@@ -171,46 +173,84 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
     //此时，就需要theoretical_out_MatZ_buffer_num个buffer缓存所有的中间结果
     val buffer_array=Vec.fill(cfg.out_MatZ_buffer_num)(out_MatZ_buffer(cfg))//这里看需求决定例化多少个buffer，theoretical_out_MatZ_buffer_num是最坏情况
     //为每个潜在的输出矩阵定义一个缓存，可以参看最上面的图
-    val SystolicArray2DUnit_buffer_ptr=Vec.fill(cfg.out_MatZ_buffer_num)(Reg(UInt(log2Up(cfg.out_MatZ_buffer_num) bits)) init 0)
-    //按照索引规定乘加器的输出行为(简单来说就是输出到哪个buffer)
-    for(i <- 0 until cfg.out_MatZ_buffer_num)
-    {
-        //该改索引号的优先改索引号
-        when(out_MatZ_Bundle_wire(0)(0).Final)//当索引为00的单元输出结果时，说明这是一个新的矩阵结果，0号索引号+1，并且如果超出了缓存数量，则从0重新开始
-        {
-
-        
-
-            
-        }otherwise//如果索引为00的单元输出结果不是，说明是同一个矩阵的结果，0号索引号不变。
-        {
-
-        }
-    //所有情况下，矩阵的输出数据都会被写入对应的缓存中
-    
-
-    }
-
-    
-
-
-    
+    val Unit2buffer_ptr=Vec.fill(cfg.out_MatZ_buffer_num)(Reg(UInt(log2Up(cfg.out_MatZ_buffer_num) bits)) init 0)
+    //定义一个输出指针，指定模块的输出端口连接到哪个buffer
     val buffer_array_output_ptr=Reg(UInt(log2Up(cfg.out_MatZ_buffer_num) bits)) init 0
-    
+    when(io.out_MatZ.ready)
+{    //先定义一个buffer结构
+
+    //按照索引规定乘加器的输出行为(简单来说就是输出到哪个buffer)
+    for(i <- (1 until cfg.out_MatZ_buffer_num).reverse)//i<-{23,22,...,1}
+    {
+        //更新索引号
+        Unit2buffer_ptr(i) := Unit2buffer_ptr(i-1)
+        
+    }
+    when(out_MatZ_Bundle_wire(0)(0).Final)
+    {
+        //当索引为00的单元输出结果时，说明这是一个新的矩阵结果，0号索引号+1，并且如果超出了缓存数量，则从0重新开始
+        Unit2buffer_ptr(0) := ((Unit2buffer_ptr(0)+1)>=(cfg.out_MatZ_buffer_num))?(Unit2buffer_ptr(0)+1)|(0)     
+        buffer_array(Unit2buffer_ptr(0)).Occupied := True
+    }
+    when(out_MatZ_Bundle_wire(cfg.in_MatA_row_num-1)(cfg.in_MatB_col_num-1).Final)
+    {
+        //当索引为(in_MatA_row_num-1,in_MatB_col_num-1)的单元输出结果时，说明已经完成了一个矩阵的计算，此时，对应的buffer的Valid应该被置位
+        buffer_array(Unit2buffer_ptr(0)).Valid := True
+    }otherwise{
+        buffer_array(Unit2buffer_ptr(0)).Valid := False
+    }
+    //所有情况下，矩阵的输出数据都会被写入对应的缓存中
+    for(i <- (0 until cfg.out_MatZ_buffer_num))//i<-{0,1,...,23}
+    {
+        when(buffer_array(i).Occupied)
+{        if(cfg.is_col_wider)//0<in_MatA_row_num<in_MatB_col_num时
+        {
+            if((i>=0)&&(i<cfg.in_MatA_row_num)){//i<-{0,1,...,in_MatA_row_num-1}
+                // 0<=i<in_MatA_row_num时 Unit2buffer_ptr(i)同时指示行和列的索引,当对应阵列的final为1时，将对应的元素写入缓存
+                for(row_index <- 0 until i){when(out_MatZ_Bundle_wire(row_index)(i).Final){buffer_array(Unit2buffer_ptr(i)).data(row_index)(i) := out_MatZ_Bundle_wire(row_index)(i).data}}
+                for(col_index <- 0 until i){when(out_MatZ_Bundle_wire(i)(col_index).Final){buffer_array(Unit2buffer_ptr(i)).data(i)(col_index) := out_MatZ_Bundle_wire(i)(col_index).data}}
+                when(out_MatZ_Bundle_wire(i)(i).Final){buffer_array(Unit2buffer_ptr(i)).data(i)(i) := out_MatZ_Bundle_wire(i)(i).data}
+            }
+            else{
+                //in_MatA_row_num<=i<in_MatB_col_num时 Unit2buffer_ptr(i)只指示列的索引，当对应阵列的final为1时，将对应的元素写入缓存
+                for(row_index <- 0 until cfg.in_MatA_row_num){when(out_MatZ_Bundle_wire(row_index)(i).Final){buffer_array(Unit2buffer_ptr(i)).data(row_index)(i) := out_MatZ_Bundle_wire(row_index)(i).data}}
+            }
+        }
+        else{//0<in_MatB_col_num<=in_MatA_row_num时
+            if((i>=0)&&(i<cfg.in_MatB_col_num)){
+                // 0<=i<in_MatB_col_num时 Unit2buffer_ptr(i)同时指示行和列的索引，当对应阵列的final为1时，将对应的元素写入缓存
+                for(row_index <- 0 until i){when(out_MatZ_Bundle_wire(row_index)(i).Final){buffer_array(Unit2buffer_ptr(i)).data(row_index)(i) := out_MatZ_Bundle_wire(row_index)(i).data}}
+                for(col_index <- 0 until i){when(out_MatZ_Bundle_wire(i)(col_index).Final){buffer_array(Unit2buffer_ptr(i)).data(i)(col_index) := out_MatZ_Bundle_wire(i)(col_index).data}}
+                when(out_MatZ_Bundle_wire(i)(i).Final){buffer_array(Unit2buffer_ptr(i)).data(i)(i) := out_MatZ_Bundle_wire(i)(i).data}
+            }
+            else{
+                //in_MatB_col_num<=i<in_MatA_row_num时 Unit2buffer_ptr(i)只指示行的索引，当对应阵列的final为1时，将对应的元素写入缓存
+                for(col_index<- 0 until cfg.in_MatB_col_num){when(out_MatZ_Bundle_wire(i)(col_index).Final){buffer_array(Unit2buffer_ptr(i)).data(i)(col_index) := out_MatZ_Bundle_wire(i)(col_index).data}}
+            }
+        }
+        //对于每一个buffer，如果当前时钟周期valid为1，下个周期就会将其复位
+        when(buffer_array(i).Valid)
+        {
+            buffer_array(i).Valid := False
+            buffer_array(i).Occupied:=False
+        }}
+    }
+}
     io.out_MatZ.payload<>buffer_array(buffer_array_output_ptr).data
+    io.out_MatZ.valid<>buffer_array(buffer_array_output_ptr).Valid
+    io.in_MatA.ready<>io.out_MatZ.ready
+    io.in_MatB.ready<>io.out_MatZ.ready
 
-
-    
 }
 
 object SystolicArray2D_Verilog extends App{
-  val testLength=3
-  val cfg = SystolicArray2D_Config(testLength)
+  val testLength=8
+  val cfg = SystolicArray2D_Config(in_Length_Max=testLength,in_MatA_row_num=8,in_MatB_col_num=8)
 
     val FileDir = "rtl/SystolicArray2D/verilog"
     import java.io.File
     new File(FileDir).mkdirs()
-    
+
     SpinalConfig(
     targetDirectory = FileDir,
     oneFilePerComponent = true,
