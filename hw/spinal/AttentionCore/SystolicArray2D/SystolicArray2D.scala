@@ -121,21 +121,28 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
         message="SystolicArray2D_Config.out_MatZ_buffer_num is too big,which is meaningless")
     assert(assertion=(cfg.out_MatZ_buffer_num>1),
     message="SystolicArray2D_Config.out_MatZ_buffer_num shall be at least 2")
-    val Go=(io.out_MatZ.fire)&&(io.in_Mats.fire)//判定前级和后级是否正在运转，如果不满足输出条件就暂停整个模块
+    val Go=Bool()
+    Go:=(io.out_MatZ.ready)&&(io.in_Mats.valid)//判定前级和后级是否正在运转，如果不满足输出条件就暂停整个模块
     val in_MatA_AfterDelay=Vec.fill(cfg.in_MatA_row_num){Sint_withFinalMark(cfg.in_MatA_element_Width)}
+    val init_Sint_withFinalMark_MatA=Sint_withFinalMark(cfg.in_MatA_element_Width)
+    init_Sint_withFinalMark_MatA.data:=0
+    init_Sint_withFinalMark_MatA.Final:=False
+    val init_Sint_withFinalMark_MatB=Sint_withFinalMark(cfg.in_MatB_element_Width)
+    init_Sint_withFinalMark_MatB.data:=0
+    init_Sint_withFinalMark_MatB.Final:=False
     for(row_index<-0 until cfg.in_MatA_row_num)
     {
         //遍历模块的A输入线
         //对row_index等于几，这条信号线就需要延迟多少个时钟周期
         
-        in_MatA_AfterDelay(row_index):=Delay(io.in_Mats.payload.A(row_index),row_index,when = Go)
+        in_MatA_AfterDelay(row_index):=Delay(io.in_Mats.payload.A(row_index),row_index,when = Go,init=init_Sint_withFinalMark_MatA)
 
     }
     val in_MatB_AfterDelay=Vec.fill(cfg.in_MatB_col_num){Sint_withFinalMark(cfg.in_MatB_element_Width)}
     for(col_index<-0 until cfg.in_MatB_col_num)
     {
         //遍历模块的B输入线
-        in_MatB_AfterDelay(col_index):=Delay(io.in_Mats.payload.B(col_index),col_index,when = Go)
+        in_MatB_AfterDelay(col_index):=Delay(io.in_Mats.payload.B(col_index),col_index,when = Go,init = init_Sint_withFinalMark_MatB)
     }
 
     val interconnect_outA_with_inA=Vec.fill(cfg.in_MatA_row_num)(Vec.fill(cfg.in_MatB_col_num)(new Bundle{
@@ -202,6 +209,7 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
     val Unit2buffer_ptr=Vec.fill(cfg.out_MatZ_buffer_num)(Reg(UInt(log2Up(cfg.out_MatZ_buffer_num) bits)) init 0)
     //定义一个输出指针，指定模块的输出端口连接到哪个buffer
     val buffer_array_output_ptr=Reg(UInt(log2Up(cfg.out_MatZ_buffer_num) bits)) init 0
+    val next_Unit2buffer_ptr_0=((Unit2buffer_ptr(0)+1)<(cfg.out_MatZ_buffer_num))?(Unit2buffer_ptr(0)+1)|(0)     
     when(Go)
     {    //先定义一个buffer结构
 
@@ -212,23 +220,25 @@ case class SystolicArray2D(cfg: SystolicArray2D_Config) extends Component {
             Unit2buffer_ptr(i) := Unit2buffer_ptr(i-1)
             
         }
-        when(out_MatZ_Bundle_wire(0)(0).Final)
+        
+        when((in_MatA_AfterDelay(0).Final)&&(in_MatB_AfterDelay(0).Final))
         {
-            //当索引为00的单元输出结果时，说明这是一个新的矩阵结果，0号索引号+1，并且如果超出了缓存数量，则从0重新开始
-            Unit2buffer_ptr(0) := ((Unit2buffer_ptr(0)+1)<(cfg.out_MatZ_buffer_num))?(Unit2buffer_ptr(0)+1)|(0)     
-            buffer_array(Unit2buffer_ptr(0)).Occupied := True
+            //当索引为00的单元被输入final信号是，说明下一个周期该单元会输出一个 新的矩阵 的结果，0号索引号+1，并且如果超出了缓存数量，则从0重新开始
+            Unit2buffer_ptr(0) := next_Unit2buffer_ptr_0
+            buffer_array(next_Unit2buffer_ptr_0).Occupied := True
         }
         when(out_MatZ_Bundle_wire(cfg.in_MatA_row_num-1)(cfg.in_MatB_col_num-1).Final)
         {
             //当索引为(in_MatA_row_num-1,in_MatB_col_num-1)的单元输出结果时，说明已经完成了一个矩阵的计算，此时，对应的buffer的Valid应该被置位
-            buffer_array(Unit2buffer_ptr(0)).Valid := True
+            buffer_array(Unit2buffer_ptr(cfg.out_MatZ_buffer_num-1)).Valid := True
+            buffer_array_output_ptr:=Unit2buffer_ptr(cfg.out_MatZ_buffer_num-1)
         }otherwise{
-            buffer_array(Unit2buffer_ptr(0)).Valid := False
+            buffer_array(Unit2buffer_ptr(cfg.out_MatZ_buffer_num-1)).Valid := False
         }
         //所有情况下，矩阵的输出数据都会被写入对应的缓存中
         for(i <- (0 until cfg.out_MatZ_buffer_num))//i<-{0,1,...,23}
         {
-            when(buffer_array(i).Occupied)
+            when(buffer_array(Unit2buffer_ptr(i)).Occupied)
             {
                 if(cfg.is_col_wider)//0<in_MatA_row_num<in_MatB_col_num时
                 {
