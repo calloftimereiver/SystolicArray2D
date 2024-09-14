@@ -41,7 +41,7 @@ inA_Final───►│  inB_Width  ├──outA_Final─►
              │             ├───────┐      
              └─────────────┘       │      
                 │      │         outZ     
-              outB outB_Final       │      
+              outB outB_Final      │      
                 │      │           │      
                 ▼      ▼           └────► 
   

@@ -10,7 +10,14 @@ val spinalIdslPlugin = compilerPlugin("com.github.spinalhdl" %% "spinalhdl-idsl-
 lazy val projectname = (project in file("."))
   .settings(
     Compile / scalaSource := baseDirectory.value / "hw" / "spinal",
-    libraryDependencies ++= Seq(spinalCore, spinalLib, spinalIdslPlugin)
+    libraryDependencies  ++= Seq(
+    spinalCore, spinalLib, spinalIdslPlugin,
+    "org.scalanlp" %% "breeze" % "1.1",
+    "org.scalanlp" %% "breeze-natives" % "1.1",
+    "org.scalanlp" %% "breeze-viz" % "1.1"
+    )
   )
 
 fork := true
+
+
