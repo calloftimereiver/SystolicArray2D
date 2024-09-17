@@ -1,24 +1,24 @@
 package AttentionCore.SystolicArray2D
 import spinal.core.sim._
-import spinal.lib.sim.{StreamMonitor, StreamDriver, StreamReadyRandomizer, ScoreboardInOrder}
+import spinal.lib.sim.{StreamMonitor, StreamDriver, StreamReadyRandomizer,ScoreboardInOrder_matrix}
 import scala.util.Random
 
 object SystolicArray2D_Sim extends App {
   val FileDir = "rtl/SystolicArray2D/verilog"
   import java.io.File
   new File(FileDir).mkdirs()
-  val testLength = 3
+  val mult_dim = 3
 
   // 矩阵A的行数和列数
   val rowsA = 4
-  val colsA = testLength
+  val colsA = mult_dim
 
   // 矩阵B的行数（必须等于矩阵A的列数），列数
   val rowsB = colsA
   val colsB = 5
 
   val cfg = SystolicArray2D_Config(
-    in_Length_Max = testLength,
+    in_Length_Max = mult_dim,
     in_MatA_row_num = rowsA,
     in_MatB_col_num = colsB,
     in_MatA_element_Width = 8,
@@ -57,10 +57,14 @@ object SystolicArray2D_Sim extends App {
     result
   }
 
+
+
+
+
   dut.doSim("simple test") { dut =>
     SimTimeout(20000)
 
-    val scoreboard = ScoreboardInOrder[Array[Array[Int]]]
+    val scoreboard = ScoreboardInOrder_matrix()
     // 生成两个随机矩阵
     val matrixA = generateRandomMatrix(rowsA, colsA)
     val matrixB = generateRandomMatrix(rowsB, colsB)
@@ -73,18 +77,18 @@ object SystolicArray2D_Sim extends App {
     println("Matrix B:")
     printMatrix(matrixB)
 
-    var StreamDriver_called_counter = 0
+    var StreamDriver_sending_period = 0
     // drive random data and add pushed data to scoreboard
     dut.io.in_Mats.valid #= true
     StreamDriver(dut.io.in_Mats, dut.clockDomain) { payload =>
       for (row_index <- 0 until cfg.in_MatA_row_num) {
-        if (StreamDriver_called_counter < testLength - 1) {
-          payload.A(row_index).data #= matrixA(row_index)(StreamDriver_called_counter)
+        if (StreamDriver_sending_period < mult_dim - 1) {
+          payload.A(row_index).data #= matrixA_sending(row_index)(StreamDriver_sending_period)
           payload.A(row_index).Final #= false
            }
-        else if(StreamDriver_called_counter == testLength - 1)
+        else if(StreamDriver_sending_period == mult_dim - 1)
         {
-          payload.A(row_index).data #= matrixA(row_index)(StreamDriver_called_counter)
+          payload.A(row_index).data #= matrixA_sending(row_index)(StreamDriver_sending_period)
           payload.A(row_index).Final #= true
         }
         else { 
@@ -92,19 +96,20 @@ object SystolicArray2D_Sim extends App {
           payload.A(row_index).Final #= false }
       }
       for (col_index <- 0 until cfg.in_MatB_col_num) {
-        if (StreamDriver_called_counter < testLength - 1){
-          payload.B(col_index).data #= matrixB(StreamDriver_called_counter)(col_index)
+        if (StreamDriver_sending_period < mult_dim - 1){
+          payload.B(col_index).data #= matrixB_sending(StreamDriver_sending_period)(col_index)
           payload.B(col_index).Final #= false
         }
-        else if (StreamDriver_called_counter == testLength - 1) {
-          payload.B(col_index).data #= matrixB(StreamDriver_called_counter)(col_index)
+        else if (StreamDriver_sending_period == mult_dim - 1) {
+          payload.B(col_index).data #= matrixB_sending(StreamDriver_sending_period)(col_index)
           payload.B(col_index).Final #= true }
         else { 
           payload.B(col_index).data #=0
           payload.B(col_index).Final #= false }
       }
-      println(s"StreamDriver called:${StreamDriver_called_counter}")
-      StreamDriver_called_counter = StreamDriver_called_counter + 1
+      //println(s"StreamDriver called:${StreamDriver_sending_period}")
+
+      StreamDriver_sending_period = if(StreamDriver_sending_period == mult_dim - 1){0}else {StreamDriver_sending_period + 1}
       true
     }
 
