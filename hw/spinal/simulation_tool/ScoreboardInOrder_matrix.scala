@@ -6,6 +6,8 @@ import spinal.core.sim._
 import scala.collection.mutable
 
 
+
+
 case class ScoreboardInOrder_matrix() {
   val dut,ref = mutable.Queue[Array[Array[Int]]]()
   var matches = 0
@@ -27,17 +29,22 @@ case class ScoreboardInOrder_matrix() {
   }
 
   def compare(ref : Array[Array[Int]], dut : Array[Array[Int]]) = !(ref.deep != dut.deep)
+  def printMatrix(matrix: Array[Array[Int]]): Unit = {
+    matrix.foreach(row => println(row.mkString("\t")))
+    println()
+  }
 
   def check(): Unit ={
     if(ref.nonEmpty && dut.nonEmpty){
       val dutHead = dut.dequeue()
       val refHead = ref.dequeue()
+
       if(!compare(refHead, dutHead)){
         println("Transaction mismatch :")
         println("REF :")
-        println(refHead)
+        printMatrix(refHead)
         println("DUT :")
-        println(dutHead)
+        printMatrix(dutHead)
         simFailure()
       }
       matches += 1
