@@ -7,8 +7,8 @@ object SystolicArray2D_Sim extends App {
   val FileDir = "rtl/SystolicArray2D/verilog"
   import java.io.File
   new File(FileDir).mkdirs()
-  val matrix_num=20
-  val mult_dim = 4
+  val matrix_num=30
+  val mult_dim = 10
 
   // 矩阵A的行数和列数
   val rowsA = 4
@@ -20,11 +20,11 @@ object SystolicArray2D_Sim extends App {
 
   val cfg = SystolicArray2D_Config(
     in_Length_Max = mult_dim,
+    in_Length_Min = mult_dim,
     in_MatA_row_num = rowsA,
     in_MatB_col_num = colsB,
     in_MatA_element_Width = 8,
-    in_MatB_element_Width = 8,
-    out_MatZ_buffer_num = 5
+    in_MatB_element_Width = 8
   )
   val dut = SimConfig.withFstWave.compile(new SystolicArray2D(cfg))
   // 生成随机矩阵
