@@ -11,12 +11,12 @@ object SystolicArray2D_Sim extends App {
   val mult_dim = 10
 
   // 矩阵A的行数和列数
-  val rowsA = 4
+  val rowsA = 3
   val colsA = mult_dim
 
   // 矩阵B的行数（必须等于矩阵A的列数），列数
   val rowsB = colsA
-  val colsB = 5
+  val colsB = 3
 
   val cfg = SystolicArray2D_Config(
     in_Length_Max = mult_dim,

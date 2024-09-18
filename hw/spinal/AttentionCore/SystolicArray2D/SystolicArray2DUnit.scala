@@ -21,7 +21,7 @@ case class SystolicArray2DUnit_Config
     val ABProduct_Width = inA_Width+inB_Width
     val outZ_Width = ABProduct_Width + log2Up(in_Length)
     
-    val Max_Latency = 1//得到全部输入后一周期就能出结果
+    val Latency = 1//得到全部输入后一周期就能出结果
     val IterationInterval = 1
     //对于每个元素，理想情况下每一个时钟周期都可以输入一个数据，除非下游的buffer阻塞，这种情况下本单元会传递该阻塞信号
 }

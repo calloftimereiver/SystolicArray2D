@@ -45,9 +45,9 @@ case class SystolicArray2D_Config(
   // 此时，就需要out_MatZ_buffer_num个buffer缓存所有的中间结果
   val diag_num: Int = in_MatB_col_num + in_MatA_row_num
   val out_MatZ_buffer_num: Int = ceilDiv(diag_num,in_Length_Min)+2 
-  // 待标定，现在只是占位符
-  val Latency = in_MatA_row_num+in_MatB_col_num
-  val IterationInterval = 1
+
+  val IterationInterval = SystolicArray2DUnit_Cfg.IterationInterval
+  val Latency = (in_MatA_row_num+in_MatB_col_num)*IterationInterval+SystolicArray2DUnit_Cfg.Latency
 }
 
 //        ┌────────────────────────────┐────┐─────────┐
